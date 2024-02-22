@@ -1,0 +1,34 @@
+import bpy
+import os
+
+# Получение пути к текущему файлу Blender
+current_file_path = bpy.data.filepath
+current_directory = os.path.dirname(current_file_path)
+
+# Выбор всех объектов в сцене и их выделение
+for obj in bpy.context.scene.objects:
+    obj.select_set(True)
+
+# Преобразование выбранных объектов в сетки
+bpy.ops.object.convert(target='MESH')
+
+# Создание папки для экспорта
+export_folder = os.path.join(current_directory, "exported_files")
+os.makedirs(export_folder, exist_ok=True)
+
+# Экспорт в форматах .obj и .fbx
+file_formats = ['OBJ', 'FBX']
+
+for obj in bpy.context.selected_objects:
+    # Проверка, что объект является сеткой
+    if obj.type == 'MESH':
+        # Имя файла совпадает с именем объекта
+        file_name = obj.name
+
+        for file_format in file_formats:
+            file_path = os.path.join(export_folder, f"{file_name}.{file_format.lower()}")
+            
+            if file_format == 'OBJ':
+                bpy.ops.export_scene.obj(filepath=file_path, use_selection=True, use_materials=False)
+            elif file_format == 'FBX':
+                bpy.ops.export_scene.fbx(filepath=file_path, use_selection=True)
